@@ -1,0 +1,75 @@
+Question ID: 1
+Question: Is there something special I should worry about this weekend?
+Prompt: You are a skilled data analyst.  Your role is to explain which steps are needed in order to answer the question asked by user. The solution would be written in MS SQL and would query database in order to directly find the answer. Analyze the question and describe in multiply steps how MSSQL query should be built in order to answer the question.
+The analyst is working on follwing data 
+    The event_log data for the process is  stored in the table:BPI_Challenge_2019
+    columns:['case_concept_name', 'event_concept_name', 'event_time_timestamp' ]
+    column_types:['nvarchar', 'nvarchar','datetime2' ].
+    In process mining, a case represents a single instance of a business process. 
+    It has a unique ID and attributes like cycle time and costs. 
+    Cases are used to analyze and improve processes .
+
+    ID of a case is stored in case_concept_name column.
+    Each case is composed of multiple events.
+    An event name, and identifier, is stored in event_concept_name. 
+    The time of execution of the event is stored in event_time_timestamp.
+    Use minutes in datediff instead of seconds.
+
+    If not additionaly specified task duration is a time duration between an event and consecutive event.
+    bottleneck is expectionally long time between two events following each other. For description of bottleneck use event1 -> event2
+    Use 2019-01-17 as today or current date , also use current date for this week, this weekend, today etc. 
+
+
+keywords important for answering: 
+['weekend:    To analyze the impact of weekends on the process, you can extract the day of the week from the event_time_timestamp column and filter the events that occur on weekends.', '\n']
+
+QUESTION:
+Is there something special I should worry about this weekend?
+
+Write an answer in following order 
+STEPS:
+here are the steps to acomplish the task. Do not add additional text or explenation outside of STEPS part. DO not add code outside of CODE part.
+
+CODE: 
+```
+here should be an example MS SQL Query
+```
+DESCRIPTION:
+here is a description and reasoning behind the above approach. 
+
+
+SQL :
+WITH WeekendEvents AS (
+	SELECT *, DATEPART(WEEKDAY, event_time_timestamp) as DayOfWeek
+	FROM BPI_Challenge_2019
+	WHERE DATEPART(WEEKDAY, event_time_timestamp) IN (1, 7)
+),
+EventDurations AS (
+	SELECT *,
+		LEAD(event_time_timestamp) OVER (PARTITION BY case_concept_name ORDER BY event_time_timestamp) 
+		AS NextEventTimestamp
+	FROM WeekendEvents
+),
+DurationBetweenEvents AS (
+	SELECT *,
+		DATEDIFF(MINUTE, event_time_timestamp, NextEventTimestamp) as Duration
+	FROM EventDurations
+)
+SELECT event_concept_name, 
+       CONCAT(event_concept_name, ' -> ', 
+       LEAD(event_concept_name) OVER (PARTITION BY case_concept_name ORDER BY event_time_timestamp))
+       AS Bottleneck,
+       AVG(Duration) as AvgDuration, 
+       MAX(Duration) AS MaxDuration
+FROM DurationBetweenEvents
+GROUP BY event_concept_name, 
+         CONCAT(event_concept_name, ' -> ', 
+         LEAD(event_concept_name) OVER (PARTITION BY case_concept_name ORDER BY event_time_timestamp))
+HAVING MAX(Duration) > AVG(Duration) * 2
+
+RESULT:
+wrong
+
+CATEGORY_WRONG:
+sql error
+

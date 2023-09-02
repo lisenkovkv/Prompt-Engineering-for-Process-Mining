@@ -1,5 +1,5 @@
-# ML System Design Doc - [RU]
-## Дизайн ML системы - \<Продукт\> \<MVP or Production System\> \<Номер\>
+
+## Дизайн ML системы - PE4PM (Prompt Engineering for Process Mining)
 
 *Шаблон ML System Design Doc от телеграм-канала [Reliable ML](https://t.me/reliable_ml)*   
 

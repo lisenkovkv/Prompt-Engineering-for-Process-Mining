@@ -1,0 +1,90 @@
+Question ID: 7
+Question: Which are the longest and shortest cases in average?
+Prompt: You are a skilled data analyst.  Your role is to explain which steps are needed in order to answer the question asked by user. The solution would be written in MS SQL and would query database in order to directly find the answer. Analyze the question and describe in multiply steps how MSSQL query should be built in order to answer the question.
+The analyst is working on follwing data 
+    The event_log data for the process is  stored in the table:BPI_Challenge_2019
+    columns:['case_concept_name', 'event_concept_name', 'event_time_timestamp' ]
+    column_types:['nvarchar', 'nvarchar','datetime2' ].
+    In process mining, a case represents a single instance of a business process. 
+    It has a unique ID and attributes like cycle time and costs. 
+    Cases are used to analyze and improve processes .
+
+    ID of a case is stored in case_concept_name column.
+    Each case is composed of multiple events.
+    An event name, and identifier, is stored in event_concept_name. 
+    The time of execution of the event is stored in event_time_timestamp.
+    Use minutes in datediff instead of seconds.
+
+    If not additionaly specified task duration is a time duration between an event and consecutive event.
+    bottleneck is expectionally long time between two events following each other. For description of bottleneck use event1 -> event2
+    Use 2019-01-17 as today or current date , also use current date for this week, this weekend, today etc. 
+
+
+keywords important for answering: 
+['cases:    Cases represent a single instance of a business process and have a unique ID and attributes like cycle time and costs. \n    In BPI_Challenge_2019, case ID is stored in case_concept_name column.', '\n', 'average:    The average is a statistical measure that represents the central value of a set of data. \n    In BPI_Challenge_2019, we can compute the average of specific columns such as event_Cumulative_net_worth_EUR.', '\n', 'longest:    To find the longest case you can calculate the cycle time of each case and then sort it in a descending order.\n    The cycle time can be calculated as the difference between the first and last event timestamp of each case. \n    You can find the first event timestamp in the event_time_timestamp column and the case ID in the case_concept_name column.', '\n', 'shortest:Activity represents a specific step in a process and is stored in the event_concept_name column.', '\n']
+
+QUESTION:
+Which are the longest and shortest cases in average?
+
+Write an answer in following order 
+STEPS:
+here are the steps to acomplish the task. Do not add additional text or explenation outside of STEPS part. DO not add code outside of CODE part.
+
+CODE: 
+```
+here should be an example MS SQL Query
+```
+DESCRIPTION:
+here is a description and reasoning behind the above approach. 
+
+
+
+
+----------------------------------RESPONSE OPEN AI: 
+
+STEPS:
+1. Calculate the cycle time of each case by finding the difference between the first and last event timestamp of each case.
+2. Group the cases by their case ID and calculate the average cycle time for each case.
+3. Sort the cases by their average cycle time in ascending order to find the shortest case and in descending order to find the longest case.
+
+CODE:
+```
+SELECT case_concept_name, AVG(DATEDIFF(minute, MIN(event_time_timestamp), MAX(event_time_timestamp))) AS avg_cycle_time
+FROM BPI_Challenge_2019
+GROUP BY case_concept_name
+ORDER BY avg_cycle_time ASC -- for shortest case
+-- ORDER BY avg_cycle_time DESC -- for longest case
+```
+
+DESCRIPTION:
+The query first calculates the cycle time of each case by finding the difference between the first and last event timestamp of each case using the DATEDIFF function. It then groups the cases by their case ID and calculates the average cycle time for each case using the AVG function. Finally, it sorts the cases by their average cycle time in ascending order to find the shortest case and in descending order to find the longest case.
+--------------------------------
+WITH CaseDurations AS (
+    SELECT 
+        case_concept_name,
+        DATEDIFF(MINUTE, MIN(event_time_timestamp), MAX(event_time_timestamp)) AS duration
+    FROM 
+        BPI_Challenge_2019
+    GROUP BY 
+        case_concept_name
+),
+AverageDuration AS (
+    SELECT 
+        AVG(duration) AS avg_duration
+    FROM 
+        CaseDurations
+)
+
+SELECT 
+    MIN(case_concept_name) AS shortest_case,
+    MIN(duration) AS shortest_duration,
+    MAX(case_concept_name) AS longest_case,
+    MAX(duration) AS longest_duration
+FROM 
+    CaseDurations
+WHERE 
+    duration = (SELECT MIN(duration) FROM CaseDurations)
+    OR duration = (SELECT MAX(duration) FROM CaseDurations);
+----------------------------------SQL RESULT: 
+
+[('4507000363_00010', 0, '4508075962_00001', 36965649)]

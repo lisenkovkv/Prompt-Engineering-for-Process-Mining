@@ -1,0 +1,32 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2709
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica-Bold;\f1\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c100000\c100000\c100000;\cssrgb\c0\c0\c0;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\b\fs22\fsmilli11281 \cf0 \cb2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 Understood question
+\f1\b0 \
+\
+the example of the question that we considered understood is "What are the main bottlenecks in the process".\
+    The reasoning that the LLM used:\
+1.Calculate the duration between consecutive events for each case using the LAG function. \
+2. Calculate the maximum duration for each case using the MAX function.\
+3. Calculate the average maximum duration for all cases using the AVG function.\
+4. Identify the cases with maximum duration greater than twice the average maximum duration.\
+5. Identify the bottleneck events for the identified cases by concatenating the event names using the FOR XML PATH() function.\
+6. Output the bottleneck events.\
+\
+
+\f0\b Partially understood question
+\f1\b0 \
+\
+the example of such question is the query "How many services do not conform to the online sales model?". The Chain-Of-Thought of the LLM was:\
+1. Define the online sales model process as a list of consecutive events in the correct order\
+2. Retrieve unique case IDs and their corresponding event sequences from the BPI\\_Challenge\\_2019 table\
+3. Compare each event sequence with the predefined online sales model process to determine non-conformity\
+4. Count the number of non-conforming services\
+\
+}

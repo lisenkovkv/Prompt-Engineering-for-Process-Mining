@@ -1,0 +1,106 @@
+Question ID: 23
+Question: What are the main causes of bottlenecks?
+Prompt: You are a skilled data analyst.  Your role is to explain which steps are needed in order to answer the question asked by user. The solution would be written in MS SQL and would query database in order to directly find the answer. Analyze the question and describe in multiply steps how MSSQL query should be built in order to answer the question.
+The analyst is working on follwing data 
+    The event_log data for the process is  stored in the table:BPI_Challenge_2019
+    columns:['case_concept_name', 'event_concept_name', 'event_time_timestamp' ]
+    column_types:['nvarchar', 'nvarchar','datetime2' ].
+    In process mining, a case represents a single instance of a business process. 
+    It has a unique ID and attributes like cycle time and costs. 
+    Cases are used to analyze and improve processes .
+
+    ID of a case is stored in case_concept_name column.
+    Each case is composed of multiple events.
+    An event name, and identifier, is stored in event_concept_name. 
+    The time of execution of the event is stored in event_time_timestamp.
+    Use minutes in datediff instead of seconds.
+    Use the FOR XML PATH() function to concatenate values instead of STRING_AGG()
+
+    If not additionaly specified task duration is a time duration between an event and consecutive event.
+    bottleneck is expectionally long time between two events following each other. For description of bottleneck use event1 -> event2
+
+
+
+keywords important for answering: 
+['bottlenecks:    Bottlenecks are points in a process where the flow of work is slowed down or blocked altogether. \n    In BPI_Challenge_2019, bottlenecks can be identified by analyzing cycle time and identifying events or activities that take an overly long time to complete.', '\n', 'causes:    Causes are factors or events that generate a specific outcome in a process. \n    In BPI_Challenge_2019, causes can be analyzed by examining various attributes such as case_Spend_area_text, case_Document_Type, case_Purch_Doc_Category_name, case_Item_Type, and case_Item_Category.', '\n']
+
+QUESTION:
+What are the main causes of bottlenecks?
+
+Write an answer in following order 
+STEPS:
+here are the steps to acomplish the task. Do not add additional text or explenation outside of STEPS part. DO not add code outside of CODE part.
+
+CODE: 
+```
+here should be an example MS SQL Query
+DO NOT USE '--' or any comments in SQL code. Put all comments into description!!
+```
+DESCRIPTION:
+here is a description and reasoning behind the above approach. 
+
+
+
+
+----------------------------------RESPONSE OPEN AI: 
+
+STEPS:
+1. Calculate the duration between consecutive events for each case.
+2. Identify exceptionally long durations as bottlenecks.
+3. Group by event pairs (event1 -> event2) to find the most common bottlenecks.
+4. Calculate the average duration for each bottleneck event pair.
+5. Limit the results to the top 10 bottlenecks.
+
+CODE:
+```
+WITH EventDurations AS (
+  SELECT
+    case_concept_name,
+    event_concept_name,
+    event_time_timestamp,
+    LEAD(event_time_timestamp) OVER (PARTITION BY case_concept_name ORDER BY event_time_timestamp) AS next_event_time
+  FROM
+    BPI_Challenge_2019
+),
+Bottlenecks AS (
+  SELECT
+    case_concept_name,
+    event_concept_name + ' -> ' + LEAD(event_concept_name) OVER (PARTITION BY case_concept_name ORDER BY event_time_timestamp) AS event_pair,
+    DATEDIFF_BIG(minute, event_time_timestamp, next_event_time) AS duration
+  FROM
+    EventDurations
+)
+SELECT TOP 10
+  event_pair,
+  COUNT(*) AS count,
+  AVG(CAST(duration AS bigint)) AS avg_duration
+FROM
+  Bottlenecks
+WHERE
+  duration > (SELECT AVG(CAST(duration AS bigint)) * 2 FROM Bottlenecks)
+GROUP BY
+  event_pair
+HAVING
+  event_pair IS NOT NULL
+ORDER BY
+  count DESC,
+  avg_duration DESC;
+```
+
+DESCRIPTION:
+This query identifies the top 10 bottlenecks in the process by calculating the average duration between pairs of consecutive events that occurred on the same day. The query joins the BPI_Challenge_2019 table with itself to calculate the duration between each pair of consecutive events, then filters the results to only include events that occurred on the same day. The results are grouped by the pair of events and ordered by the average duration in descending order. Finally, the query limits the results to the top 10 pairs of events. The analyst can then analyze the attributes of the cases that contain the top 10 pairs of events to identify the main causes of bottlenecks.
+----------------------------------RESPONSE SQL: 
+
+   SELECT TOP 10      e1.event_concept_name + ' -> ' + e2.event_concept_name AS bottleneck,     AVG(DATEDIFF(minute, e1.event_time_timestamp, e2.event_time_timestamp)) AS avg_duration FROM      BPI_Challenge_2019 e1     JOIN BPI_Challenge_2019 e2 ON e1.case_concept_name = e2.case_concept_name                                  AND e1.event_time_timestamp < e2.event_time_timestamp WHERE      CAST(e1.event_time_timestamp AS date) = '2019-01-17'     AND CAST(e2.event_time_timestamp AS date) = '2019-01-17' GROUP BY      e1.event_concept_name + ' -> ' + e2.event_concept_name ORDER BY      avg_duration DESC;    
+----------------------------------SQL RESULT: 
+
+[Record Invoice Receipt -> Clear Invoice	84842	87090
+Record Goods Receipt -> Record Invoice Receipt	31828	76961
+Remove Payment Block -> Clear Invoice	24386	91484
+Vendor creates invoice -> Record Invoice Receipt	15059	69176
+Create Purchase Order Item -> Record Goods Receipt	11441	62926
+Create Purchase Order Item -> Vendor creates invoice	11003	70497
+Record Invoice Receipt -> Remove Payment Block	10563	83859
+Create Purchase Order Item -> Change Quantity	2342	78954
+Clear Invoice -> Cancel Invoice Receipt	1533	164519
+Clear Invoice -> Clear Invoice	1063	57885]
