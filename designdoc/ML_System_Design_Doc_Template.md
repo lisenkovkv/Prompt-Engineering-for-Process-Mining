@@ -112,7 +112,7 @@
 
 #### 2.2. Блок-схема решения  
 
-![img.jpg](attachment:img.jpg)
+![img.jpg](https://github.com/lisenkovkv/Prompt-Engineering-for-Process-Mining/blob/lebedkova_designdoc/designdoc/img.jpg)
 
 #### 2.3. Этапы решения задачи `Data Scientist`  
 
