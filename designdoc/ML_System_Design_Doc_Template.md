@@ -112,7 +112,7 @@
 
 #### 2.2. Блок-схема решения  
 
-![img-2.jpg](attachment:img-2.jpg)
+![img.jpg](attachment:img.jpg)
 
 #### 2.3. Этапы решения задачи `Data Scientist`  
 
